@@ -1,6 +1,6 @@
 # Yoffre — offre d'achat immobilier en ligne
 
-App Next.js 14 (App Router) + Supabase. Migration depuis la v0 Lovable (Vite SPA).
+App Next.js 14 (App Router) + Supabase.
 
 ## Démarrer
 

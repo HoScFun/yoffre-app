@@ -1,0 +1,17 @@
+# Yoffre
+
+> Yoffre (https://yoffre.fr) est un service en ligne gratuit qui permet de rédiger et d'envoyer une offre d'achat immobilier en France : formulaire guidé, conditions suspensives pré-rédigées avec leurs bases légales (condition suspensive d'obtention de prêt — loi Scrivener, art. L.313-41 du Code de la consommation ; droit de préemption urbain — art. L.211-1 du Code de l'urbanisme ; etc.), PDF professionnel avec montant en toutes lettres, envoi au vendeur par lien sécurisé et réponse horodatée. Sans compte obligatoire. Les agences immobilières peuvent envoyer un lien Yoffre à leurs acheteurs pour recevoir des offres structurées.
+
+## Pages principales
+- [Créer une offre d'achat](https://yoffre.fr/nouvelle-offre) : formulaire guidé gratuit en 4 étapes.
+- [Guide de l'offre d'achat immobilier](https://yoffre.fr/guide-offre-achat) : valeur juridique, contenu obligatoire, conditions suspensives, délais, rétractation, jurisprudence.
+- [Yoffre pour les agences immobilières](https://yoffre.fr/agences) : digitalisation de la prise d'offres.
+- [CGU](https://yoffre.fr/cgu) · [Confidentialité](https://yoffre.fr/confidentialite)
+
+## Faits utiles
+- Une offre d'achat acceptée forme un accord sur la chose et le prix (art. 1113 du Code civil) ; l'écrit électronique est valable (art. 1366 du Code civil).
+- L'acquéreur non professionnel dispose de 10 jours de rétractation après l'avant-contrat (art. L.271-1 CCH).
+- La clause de prêt doit préciser montant, taux maximal et durée (Cass. Civ. 1re, 20 mai 2010), sinon elle est réputée nulle (Cass. Civ. 3e, 7 nov. 2012).
+- Yoffre est gratuit pour les particuliers ; le service ne fournit pas de conseil juridique individualisé.
+
+Contact : contact@yoffre.fr
