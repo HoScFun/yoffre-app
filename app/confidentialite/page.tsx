@@ -69,7 +69,7 @@ export default function ConfidentialitePage() {
               Les données d&apos;une offre sont transmises aux destinataires que vous désignez
               (vendeur, agent immobilier, notaire). Les demandes de mise en relation sont transmises
               au seul partenaire concerné. Nos sous-traitants techniques : Supabase (hébergement des
-              données, Union européenne), Resend (envoi d&apos;emails), hébergeur du site. Aucune
+              données, Union européenne), Brevo (envoi d&apos;emails, Union européenne), hébergeur du site. Aucune
               donnée n&apos;est vendue ou transmise à des tiers en dehors de ces cas.
             </p>
           </section>

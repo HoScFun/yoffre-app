@@ -1,0 +1,7 @@
+project_id = "hwivlvllupjvsncffoir"
+
+[functions.vendor-respond]
+verify_jwt = false
+
+[functions.send-offer-emails]
+verify_jwt = false
