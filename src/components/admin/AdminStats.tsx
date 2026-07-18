@@ -133,7 +133,7 @@ export function AdminStats() {
               <XAxis dataKey="label" tick={{ fontSize: 11 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Bar dataKey="count" fill="hsl(213, 52%, 24%)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="hsl(220, 98%, 57%)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

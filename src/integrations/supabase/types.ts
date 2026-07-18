@@ -187,15 +187,25 @@ export type Database = {
       offers: {
         Row: {
           acheteur_adresse: string | null
+          acheteur_adresse_details: Json | null
+          acheteur_civilite: string | null
+          acheteur_denomination: string | null
           acheteur_email: string
+          acheteur_siren: string | null
           acheteur_nom: string
+          acheteur_prenom: string | null
+          acheteur_situation: string | null
           acheteur_telephone: string | null
           agent_immobilier: boolean | null
           bien_adresse: string
+          bien_adresse_details: Json | null
           bien_prix_affiche: number | null
           bien_prix_propose: number
           bien_type: string | null
+          conjoint_nom: string | null
+          conjoint_prenom: string | null
           created_at: string | null
+          date_signature_souhaitee: string | null
           delai_validite_jours: number | null
           disclaimer_accepted: boolean | null
           envoyer_au_vendeur: boolean | null
@@ -204,28 +214,42 @@ export type Database = {
           id: string
           message_vendeur: string | null
           notaire_email: string | null
+          professionnel_type: string | null
           profil_type: string | null
           responded_at: string | null
           sent_at: string | null
           statut: string | null
           user_id: string | null
           vendeur_adresse: string | null
+          vendeur_adresse_details: Json | null
+          vendeur_civilite: string | null
           vendeur_email: string
           vendeur_nom: string
+          vendeur_prenom: string | null
           vendor_token: string
           vendor_token_expires_at: string | null
         }
         Insert: {
           acheteur_adresse?: string | null
+          acheteur_adresse_details?: Json | null
+          acheteur_civilite?: string | null
+          acheteur_denomination?: string | null
           acheteur_email: string
+          acheteur_siren?: string | null
           acheteur_nom: string
+          acheteur_prenom?: string | null
+          acheteur_situation?: string | null
           acheteur_telephone?: string | null
           agent_immobilier?: boolean | null
           bien_adresse: string
+          bien_adresse_details?: Json | null
           bien_prix_affiche?: number | null
           bien_prix_propose: number
           bien_type?: string | null
+          conjoint_nom?: string | null
+          conjoint_prenom?: string | null
           created_at?: string | null
+          date_signature_souhaitee?: string | null
           delai_validite_jours?: number | null
           disclaimer_accepted?: boolean | null
           envoyer_au_vendeur?: boolean | null
@@ -234,28 +258,42 @@ export type Database = {
           id?: string
           message_vendeur?: string | null
           notaire_email?: string | null
+          professionnel_type?: string | null
           profil_type?: string | null
           responded_at?: string | null
           sent_at?: string | null
           statut?: string | null
           user_id?: string | null
           vendeur_adresse?: string | null
+          vendeur_adresse_details?: Json | null
+          vendeur_civilite?: string | null
           vendeur_email: string
           vendeur_nom: string
+          vendeur_prenom?: string | null
           vendor_token?: string
           vendor_token_expires_at?: string | null
         }
         Update: {
           acheteur_adresse?: string | null
+          acheteur_adresse_details?: Json | null
+          acheteur_civilite?: string | null
+          acheteur_denomination?: string | null
           acheteur_email?: string
+          acheteur_siren?: string | null
           acheteur_nom?: string
+          acheteur_prenom?: string | null
+          acheteur_situation?: string | null
           acheteur_telephone?: string | null
           agent_immobilier?: boolean | null
           bien_adresse?: string
+          bien_adresse_details?: Json | null
           bien_prix_affiche?: number | null
           bien_prix_propose?: number
           bien_type?: string | null
+          conjoint_nom?: string | null
+          conjoint_prenom?: string | null
           created_at?: string | null
+          date_signature_souhaitee?: string | null
           delai_validite_jours?: number | null
           disclaimer_accepted?: boolean | null
           envoyer_au_vendeur?: boolean | null
@@ -264,14 +302,18 @@ export type Database = {
           id?: string
           message_vendeur?: string | null
           notaire_email?: string | null
+          professionnel_type?: string | null
           profil_type?: string | null
           responded_at?: string | null
           sent_at?: string | null
           statut?: string | null
           user_id?: string | null
           vendeur_adresse?: string | null
+          vendeur_adresse_details?: Json | null
+          vendeur_civilite?: string | null
           vendeur_email?: string
           vendeur_nom?: string
+          vendeur_prenom?: string | null
           vendor_token?: string
           vendor_token_expires_at?: string | null
         }

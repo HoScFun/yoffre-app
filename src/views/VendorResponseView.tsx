@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle, FileText } from "lucide-react";
 import { generateOfferPdf } from "@/lib/pdf";
+import { fullName } from "@/types/offer";
 
 interface VendorResponseViewProps {
   token: string;
@@ -139,7 +140,7 @@ const VendorResponseView = ({ token, offer, clauses, agent }: VendorResponseView
         {/* Header banner */}
         <div className="rounded-lg p-4 mb-6 text-center bg-primary">
           <h1 className="text-lg font-bold text-white">
-            Vous avez reçu une offre d&apos;achat de {offer.acheteur_nom}
+            Vous avez reçu une offre d&apos;achat de {fullName(offer.acheteur_prenom, offer.acheteur_nom)}
           </h1>
         </div>
 

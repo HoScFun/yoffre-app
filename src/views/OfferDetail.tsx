@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { Separator } from "@/components/ui/separator";
 import { downloadOfferPdf } from "@/lib/pdf";
+import { fullName } from "@/types/offer";
 import { useToast } from "@/hooks/use-toast";
 import { numberToFrenchWords } from "@/lib/pdf";
 import { Download, Link2, Mail, ChevronRight } from "lucide-react";
@@ -164,7 +165,7 @@ const OfferDetail = () => {
         <Card className="mb-6">
           <CardContent className="p-6 space-y-4 text-sm">
             <Section title="Acheteur">
-              <p><span className="text-muted-foreground">Nom :</span> {offer.acheteur_nom}</p>
+              <p><span className="text-muted-foreground">Nom :</span> {fullName(offer.acheteur_prenom, offer.acheteur_nom)}</p>
               <p><span className="text-muted-foreground">Email :</span> {offer.acheteur_email}</p>
               {offer.acheteur_telephone && <p><span className="text-muted-foreground">Tél :</span> {offer.acheteur_telephone}</p>}
               {offer.acheteur_adresse && <p><span className="text-muted-foreground">Adresse :</span> {offer.acheteur_adresse}</p>}
@@ -181,7 +182,7 @@ const OfferDetail = () => {
             </Section>
             <Separator />
             <Section title="Vendeur">
-              <p><span className="text-muted-foreground">Nom :</span> {offer.vendeur_nom}</p>
+              <p><span className="text-muted-foreground">Nom :</span> {fullName(offer.vendeur_prenom, offer.vendeur_nom)}</p>
               <p><span className="text-muted-foreground">Email :</span> {offer.vendeur_email}</p>
               {offer.vendeur_adresse && <p><span className="text-muted-foreground">Adresse :</span> {offer.vendeur_adresse}</p>}
             </Section>

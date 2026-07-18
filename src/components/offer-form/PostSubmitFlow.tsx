@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle2, Phone, ArrowRight, Loader2 } from "lucide-react";
-import { OfferFormData } from "@/types/offer";
+import { OfferFormData, fullName } from "@/types/offer";
 
 interface PostSubmitFlowProps {
   data: OfferFormData;
@@ -70,7 +70,7 @@ export function PostSubmitFlow({ data, offerId }: PostSubmitFlowProps) {
       if (user) {
         await supabase.from("profiles").upsert({
           id: user.id,
-          full_name: data.acheteur_nom,
+          full_name: fullName(data.acheteur_prenom, data.acheteur_nom),
           phone: data.acheteur_telephone || phoneInput || null,
           email,
         });
@@ -97,7 +97,7 @@ export function PostSubmitFlow({ data, offerId }: PostSubmitFlowProps) {
           {data.envoyer_au_vendeur ? (
             <>
               <h2 className="text-xl font-bold text-green-800 mb-1">
-                Votre offre a été envoyée à {data.vendeur_nom} !
+                Votre offre a été envoyée à {fullName(data.vendeur_prenom, data.vendeur_nom)} !
               </h2>
               <p className="text-sm text-green-700">
                 Une copie vous a été envoyée par email à {data.acheteur_email}.
@@ -203,9 +203,24 @@ export function PostSubmitFlow({ data, offerId }: PostSubmitFlowProps) {
       <div className="text-center">
         <h2 className="text-xl font-bold text-primary mb-2">Créez un compte pour retrouver vos offres</h2>
         <p className="text-sm text-muted-foreground">
-          Pré-remplissage automatique de vos informations, historique de vos offres, suivi des réponses vendeurs.
+          Gratuit, en 30 secondes — votre offre actuelle sera conservée dans votre espace.
         </p>
       </div>
+
+      <ul className="text-sm text-muted-foreground space-y-2 max-w-md mx-auto">
+        <li className="flex items-start gap-2">
+          <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+          <span><strong className="text-foreground">Vos données sauvegardées</strong> : historique de vos offres, suivi des réponses vendeurs, pré-remplissage de vos prochaines offres.</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+          <span><strong className="text-foreground">Bientôt</strong> : vos conditions suspensives personnalisées réutilisables d&apos;une offre à l&apos;autre.</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+          <span><strong className="text-foreground">Bientôt</strong> : votre répertoire de contacts fréquents (notaire, agences, personnes en copie) prêt à l&apos;emploi.</span>
+        </li>
+      </ul>
 
       <Card>
         <CardContent className="p-6 space-y-4">

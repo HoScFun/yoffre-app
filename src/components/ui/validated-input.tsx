@@ -52,7 +52,7 @@ const ValidatedInput = React.forwardRef<HTMLInputElement, ValidatedInputProps>(
             value={value}
             className={cn(
               "flex h-10 w-full rounded-md border bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pr-9",
-              focused && "border-[hsl(213,56%,25%)] ring-[hsl(213,56%,25%)] focus-visible:ring-[hsl(213,56%,25%)]",
+              focused && "border-primary ring-primary focus-visible:ring-primary",
               state === "valid" && "border-green-500",
               state === "invalid" && "border-destructive",
               state === "idle" && !focused && "border-input",
@@ -109,7 +109,7 @@ const ValidatedTextarea = React.forwardRef<HTMLTextAreaElement, ValidatedTextare
           value={value}
           className={cn(
             "flex min-h-[80px] w-full rounded-md border bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-            focused && "border-[hsl(213,56%,25%)] ring-[hsl(213,56%,25%)]",
+            focused && "border-primary ring-primary",
             state === "valid" && "border-green-500",
             state === "invalid" && "border-destructive",
             state === "idle" && !focused && "border-input",

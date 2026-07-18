@@ -10,6 +10,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, X } from "lucide-react";
 
+// V0 : l'offre notaires n'est pas encore commercialisée (pilotes en privé).
+// Passer à true pour afficher l'onglet quand la page /notaires sera prête.
+const SHOW_NOTAIRES_TAB = false;
+
+const navLinks = [
+  { href: "/nouvelle-offre", label: "Créer une offre" },
+  { href: "/agences", label: "Pour les agences" },
+  ...(SHOW_NOTAIRES_TAB ? [{ href: "/notaires", label: "Pour les notaires" }] : []),
+  { href: "/guide-offre-achat", label: "Guide" },
+];
+
 export function Header() {
   const { user, profile, isAnonymous, signOut } = useAuth();
   const router = useRouter();
@@ -36,15 +47,11 @@ export function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
-          <Link href="/nouvelle-offre" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Créer une offre
-          </Link>
-          <Link href="/agences" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Pour les agences
-          </Link>
-          <Link href="/guide-offre-achat" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Guide
-          </Link>
+          {navLinks.map((l) => (
+            <Link key={l.href} href={l.href} className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              {l.label}
+            </Link>
+          ))}
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
@@ -83,15 +90,11 @@ export function Header() {
 
       {mobileOpen && (
         <div className="md:hidden border-t bg-white px-4 pb-4 space-y-3">
-          <Link href="/nouvelle-offre" onClick={() => setMobileOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground">
-            Créer une offre
-          </Link>
-          <Link href="/agences" onClick={() => setMobileOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground">
-            Pour les agences
-          </Link>
-          <Link href="/guide-offre-achat" onClick={() => setMobileOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground">
-            Guide
-          </Link>
+          {navLinks.map((l) => (
+            <Link key={l.href} href={l.href} onClick={() => setMobileOpen(false)} className="block py-2 text-sm font-medium text-muted-foreground">
+              {l.label}
+            </Link>
+          ))}
 
           <div className="border-t border-border" />
 

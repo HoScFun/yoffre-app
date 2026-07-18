@@ -124,7 +124,7 @@ export default function HomePage() {
             <Sparkles className="h-3.5 w-3.5" /> 100 % gratuit, sans compte obligatoire
           </p>
           <h1 className="text-4xl md:text-5xl font-extrabold text-primary leading-tight mb-6">
-            Votre offre d&apos;achat immobilier, rédigée dans les règles en 5 minutes
+            Votre offre d&apos;achat immobilier, rédigée dans les règles en 3 minutes
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-10 leading-relaxed">
             Formulaire guidé, conditions suspensives à cocher, PDF professionnel envoyé au
@@ -133,7 +133,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/nouvelle-offre">
               <Button size="lg" className="text-base px-8 py-6 h-auto font-semibold">
-                Créer mon offre gratuitement
+                Créer mon offre en 3 minutes
               </Button>
             </Link>
             <Link href="/guide-offre-achat">
@@ -143,9 +143,9 @@ export default function HomePage() {
             </Link>
           </div>
           <p className="mt-6 text-xs text-muted-foreground flex items-center justify-center gap-4 flex-wrap">
-            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 5 minutes</span>
+            <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> Parcours guidé, aucune expertise requise</span>
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Références légales incluses</span>
-            <span className="inline-flex items-center gap-1"><Shield className="h-3.5 w-3.5" /> Réponse vendeur horodatée</span>
+            <span className="inline-flex items-center gap-1"><Shield className="h-3.5 w-3.5" /> Rien n&apos;est envoyé sans votre validation</span>
           </p>
         </div>
       </section>
@@ -178,7 +178,9 @@ export default function HomePage() {
           <h2 className="text-2xl md:text-3xl font-bold text-center text-primary mb-2">
             Comment ça marche ?
           </h2>
-          <p className="text-center text-muted-foreground mb-12">4 étapes, moins de 5 minutes.</p>
+          <p className="text-center text-muted-foreground mb-12">
+            4 étapes guidées, environ 3 minutes. Vous prévisualisez le PDF et rien n&apos;est envoyé sans votre validation.
+          </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {steps.map((step) => (
               <div key={step.num} className="text-center">
@@ -193,8 +195,11 @@ export default function HomePage() {
           </div>
           <div className="text-center mt-12">
             <Link href="/nouvelle-offre">
-              <Button size="lg" className="font-semibold">Créer mon offre maintenant</Button>
+              <Button size="lg" className="font-semibold">Préparer une offre claire et complète</Button>
             </Link>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Les biens attractifs reçoivent souvent plusieurs offres : une offre complète, transmise vite, fait la différence.
+            </p>
           </div>
         </div>
       </section>

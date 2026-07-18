@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { Eye, FileDown, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { generateOfferPdf } from "@/lib/pdf";
+import { fullName } from "@/types/offer";
 
 interface AdminOffersProps {
   userFilter: string | null;
@@ -46,7 +47,7 @@ export function AdminOffers({ userFilter, onClearFilter }: AdminOffersProps) {
     }
     if (search) {
       const s = search.toLowerCase();
-      if (!o.acheteur_nom.toLowerCase().includes(s) && !o.bien_adresse.toLowerCase().includes(s)) return false;
+      if (!fullName(o.acheteur_prenom, o.acheteur_nom).toLowerCase().includes(s) && !o.bien_adresse.toLowerCase().includes(s)) return false;
     }
     return true;
   }) || [];
@@ -137,7 +138,7 @@ export function AdminOffers({ userFilter, onClearFilter }: AdminOffersProps) {
             ) : filtered.map((o) => (
               <TableRow key={o.id}>
                 <TableCell className="text-xs">{new Date(o.created_at || "").toLocaleDateString("fr-FR")}</TableCell>
-                <TableCell className="text-sm font-medium">{o.acheteur_nom}</TableCell>
+                <TableCell className="text-sm font-medium">{fullName(o.acheteur_prenom, o.acheteur_nom)}</TableCell>
                 <TableCell className="text-sm max-w-[250px] truncate">{o.bien_adresse}</TableCell>
                 <TableCell className="text-sm">{Number(o.bien_prix_propose).toLocaleString("fr-FR")} €</TableCell>
                 <TableCell><StatusBadge status={o.statut || "brouillon"} /></TableCell>

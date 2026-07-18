@@ -1,14 +1,15 @@
 import jsPDF from "jspdf";
+import { fullName, professionnelTypeLabels, situationLabels, civiliteLabels } from "@/types/offer";
 
-// ─── Color palette ───
-const BLUE: [number, number, number] = [30, 58, 95];
+// ─── Color palette (branding Yoffre : Electric Blue / Emerald) ───
+const BLUE: [number, number, number] = [36, 107, 253];
 const GRAY_600: [number, number, number] = [107, 114, 128];
 const GRAY_400: [number, number, number] = [156, 163, 175];
 const GRAY_300: [number, number, number] = [209, 213, 219];
 const GRAY_200: [number, number, number] = [229, 231, 235];
 const BLACK: [number, number, number] = [26, 26, 26];
-const GREEN: [number, number, number] = [34, 197, 94];
-const GREEN_DARK: [number, number, number] = [22, 163, 74];
+const GREEN: [number, number, number] = [16, 168, 120];
+const GREEN_DARK: [number, number, number] = [12, 126, 90];
 
 const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 
@@ -78,6 +79,19 @@ export function generateOfferPdf(offer: any, offerClauses: any[], vendorResponse
   const validiteJours = offer.delai_validite_jours || 10;
   const expDate = new Date(Date.now() + validiteJours * 24 * 60 * 60 * 1000);
   const prix = Number(offer.bien_prix_propose);
+  // Rétrocompatible : anciennes offres sans prénom → nom seul (qui contient le nom complet)
+  const acheteurNomComplet = [civiliteLabels[offer.acheteur_civilite] , fullName(offer.acheteur_prenom, offer.acheteur_nom)].filter(Boolean).join(" ");
+  const vendeurNomComplet = [civiliteLabels[offer.vendeur_civilite], fullName(offer.vendeur_prenom, offer.vendeur_nom)].filter(Boolean).join(" ");
+  const conjointNomComplet = fullName(offer.conjoint_prenom, offer.conjoint_nom);
+  // L'objet peut venir du formulaire (_financement, _clauseValues…) ou d'une ligne DB (financement, valeurs dans offer_clauses)
+  const financement = offer._financement ?? offer.financement;
+  const financementBanque = offer._financement_banque ?? offer.financement_banque;
+  const messageVendeur = offer._message_vendeur ?? offer.message_vendeur;
+  const pretVals = offer._clauseValues ?? {
+    valeur_montant_pret: offerClauses.find((oc: any) => oc.valeur_montant_pret)?.valeur_montant_pret,
+    valeur_taux_max: offerClauses.find((oc: any) => oc.valeur_taux_max)?.valeur_taux_max,
+    valeur_duree_pret: offerClauses.find((oc: any) => oc.valeur_duree_pret)?.valeur_duree_pret,
+  };
   let sectionNum = 0;
 
   // ─── Helpers ───
@@ -214,7 +228,7 @@ export function generateOfferPdf(offer: any, offerClauses: any[], vendorResponse
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...BLACK);
-  const presBy = `Présentée par : ${offer.acheteur_nom}`;
+  const presBy = `Présentée par : ${acheteurNomComplet}`;
   doc.text(presBy, (pw - doc.getTextWidth(presBy)) / 2, y);
   y += 7;
   doc.setFontSize(10);
@@ -247,14 +261,26 @@ export function generateOfferPdf(offer: any, offerClauses: any[], vendorResponse
 
   // SECTION 1 — L'ACQUÉREUR
   addSectionHeader("L'ACQUÉREUR");
-  addRow("Nom complet", offer.acheteur_nom);
+  addRow("Nom complet", acheteurNomComplet);
+  if (offer.profil_type === "professionnel" && offer.acheteur_denomination) {
+    addRow("Structure", offer.acheteur_denomination + (offer.acheteur_siren ? ` — SIREN ${offer.acheteur_siren}` : ""));
+  }
+  if (offer.acheteur_situation) addRow("Situation familiale", situationLabels[offer.acheteur_situation] || offer.acheteur_situation);
+  if (conjointNomComplet) addRow("Co-acquéreur", conjointNomComplet);
   addRow("Adresse", offer.acheteur_adresse || "Non renseignée");
   addRow("Email", offer.acheteur_email);
   addRow("Téléphone", offer.acheteur_telephone || "Non renseigné");
+  if (offer.profil_type === "professionnel") {
+    if (offer.professionnel_type) {
+      addRow("Qualité", professionnelTypeLabels[offer.professionnel_type] || offer.professionnel_type);
+    }
+    y += 1;
+    addWrappedText("L'acquéreur agit en qualité de professionnel de l'immobilier. Il ne bénéficie pas du délai de rétractation de dix jours prévu à l'article L.271-1 du Code de la construction et de l'habitation, réservé à l'acquéreur non professionnel.", 8, false, GRAY_600, true);
+  }
 
   // SECTION 2 — LE VENDEUR
   addSectionHeader("LE VENDEUR");
-  addRow("Nom complet", offer.vendeur_nom);
+  addRow("Nom complet", vendeurNomComplet);
   addRow("Adresse", offer.vendeur_adresse || "Non renseignée");
   addRow("Email", offer.vendeur_email);
 
@@ -269,11 +295,11 @@ export function generateOfferPdf(offer: any, offerClauses: any[], vendorResponse
 
   // SECTION 4 — MODE DE FINANCEMENT
   addSectionHeader("MODE DE FINANCEMENT");
-  if (offer._financement === "pret") {
-    addRow("Montant du prêt", `${(offer._clauseValues?.valeur_montant_pret || 0).toLocaleString("fr-FR")} €`);
-    addRow("Taux maximum", `${offer._clauseValues?.valeur_taux_max || 0} %`);
-    addRow("Durée", `${offer._clauseValues?.valeur_duree_pret || 0} mois`);
-    if (offer._financement_banque) addRow("Banque visée", offer._financement_banque);
+  if (financement === "pret") {
+    addRow("Montant du prêt", `${(pretVals?.valeur_montant_pret || 0).toLocaleString("fr-FR")} €`);
+    addRow("Taux maximum", `${pretVals?.valeur_taux_max || 0} %`);
+    addRow("Durée", `${pretVals?.valeur_duree_pret || 0} mois`);
+    if (financementBanque) addRow("Banque visée", financementBanque);
     y += 3;
     newPageIfNeeded(16);
     drawBox(margin, y, mw, 12, [220, 252, 231], [187, 247, 208]);
@@ -282,7 +308,8 @@ export function generateOfferPdf(offer: any, offerClauses: any[], vendorResponse
     doc.setTextColor(22, 101, 52);
     doc.text("Condition suspensive d'obtention de prêt applicable — Art. L.313-41 Code de la consommation (Loi Scrivener)", margin + 4, y + 7);
     y += 16;
-  } else if (offer._financement === "comptant") {
+    addWrappedText("L'acquéreur s'engage à déposer une demande de prêt conforme aux caractéristiques ci-dessus. Conformément à l'article 1304-3 du Code civil, la condition suspensive est réputée accomplie si l'acquéreur en empêche l'accomplissement, notamment en sollicitant un prêt à des conditions différentes ou en s'abstenant de déposer une demande.", 8, false, GRAY_600, true);
+  } else if (financement === "comptant") {
     addWrappedText("Acquisition sans recours à un emprunt immobilier.", 9, false, BLACK);
   } else {
     addWrappedText("Non précisé.", 9, false, GRAY_600, true);
@@ -311,7 +338,8 @@ export function generateOfferPdf(offer: any, offerClauses: any[], vendorResponse
   addSectionHeader("CONDITIONS DE L'OFFRE");
   y += 2;
   newPageIfNeeded(30);
-  const condText = `La présente offre est valable ${validiteJours} jours à compter de sa réception par le vendeur, soit jusqu'au ${formatDateFR(expDate)} à ${formatTimeFR(expDate)}.\n\nPassé ce délai sans réponse écrite du vendeur, la présente offre sera réputée refusée de plein droit, conformément à l'article 1117 du Code civil.`;
+  const dateSignature = offer.date_signature_souhaitee ? new Date(offer.date_signature_souhaitee) : null;
+  const condText = `La présente offre est valable ${validiteJours} jours à compter de sa réception par le vendeur, soit jusqu'au ${formatDateFR(expDate)} à ${formatTimeFR(expDate)}.\n\nPassé ce délai sans réponse écrite du vendeur, la présente offre sera réputée refusée de plein droit, conformément à l'article 1117 du Code civil.${dateSignature ? `\n\nL'acquéreur propose que l'acte authentique de vente soit signé au plus tard le ${formatDateFR(dateSignature)}. Cette date, utile notamment en cas de vente à terme ou différée, sera arrêtée d'un commun accord entre les parties dans l'avant-contrat.` : ""}`;
   const condLines = doc.splitTextToSize(condText, mw - 12);
   const condH = condLines.length * 4 + 10;
   drawBox(margin, y, mw, condH, [239, 246, 255], [191, 219, 254]);
@@ -322,12 +350,12 @@ export function generateOfferPdf(offer: any, offerClauses: any[], vendorResponse
   y += condH + 4;
 
   // SECTION 8 — MESSAGE (if any)
-  if (offer._message_vendeur && offer._message_vendeur.trim().length > 0) {
+  if (messageVendeur && messageVendeur.trim().length > 0) {
     addSectionHeader("MESSAGE DE L'ACQUÉREUR");
     addWrappedText("Message adressé au vendeur :", 8, false, GRAY_600, true);
     y += 2;
     newPageIfNeeded(20);
-    const msgLines = doc.splitTextToSize(offer._message_vendeur, mw - 14);
+    const msgLines = doc.splitTextToSize(messageVendeur, mw - 14);
     const msgH = msgLines.length * 4 + 10;
     drawBox(margin, y, mw, msgH, [248, 250, 252]);
     doc.setFontSize(9);
@@ -354,10 +382,11 @@ export function generateOfferPdf(offer: any, offerClauses: any[], vendorResponse
       y += 6;
 
       // Description in box
+      // Le texte des clauses porte déjà les unités (« [MONTANT] € », « [TAUX]% », « [DUREE] mois »)
       let desc = oc.clauses?.description || "";
-      if (oc.valeur_montant_pret) desc = desc.replace("[MONTANT]", `${oc.valeur_montant_pret.toLocaleString("fr-FR")} €`);
-      if (oc.valeur_taux_max) desc = desc.replace("[TAUX]", `${oc.valeur_taux_max}%`);
-      if (oc.valeur_duree_pret) desc = desc.replace("[DUREE]", `${oc.valeur_duree_pret} mois`);
+      if (oc.valeur_montant_pret) desc = desc.replace("[MONTANT]", oc.valeur_montant_pret.toLocaleString("fr-FR"));
+      if (oc.valeur_taux_max) desc = desc.replace("[TAUX]", String(oc.valeur_taux_max));
+      if (oc.valeur_duree_pret) desc = desc.replace("[DUREE]", String(oc.valeur_duree_pret));
       if (desc) {
         const descLines = doc.splitTextToSize(desc, mw - 14);
         const descH = descLines.length * 3.8 + 10;
@@ -368,6 +397,20 @@ export function generateOfferPdf(offer: any, offerClauses: any[], vendorResponse
         doc.setTextColor(...BLACK);
         doc.text(descLines, margin + 7, y + 6);
         y += descH + 2;
+      }
+
+      // Précision personnalisée de l'acquéreur (notes_custom)
+      if (oc.notes_custom && String(oc.notes_custom).trim().length > 0) {
+        const noteText = `Précision de l'acquéreur : ${String(oc.notes_custom).trim()}`;
+        const noteLines = doc.splitTextToSize(noteText, mw - 14);
+        const noteH = noteLines.length * 3.8 + 8;
+        newPageIfNeeded(noteH + 6);
+        drawBox(margin, y, mw, noteH, [239, 246, 255], [191, 219, 254]);
+        doc.setFontSize(8.5);
+        doc.setFont("helvetica", "italic");
+        doc.setTextColor(...BLACK);
+        doc.text(noteLines, margin + 7, y + 5.5);
+        y += noteH + 2;
       }
 
       // Base légale aligned right
@@ -387,7 +430,7 @@ export function generateOfferPdf(offer: any, offerClauses: any[], vendorResponse
   addSectionHeader("DÉCLARATION DE L'ACQUÉREUR");
   y += 2;
   newPageIfNeeded(50);
-  const declText = `Je soussigné(e) ${offer.acheteur_nom}, déclare :\n\n— Avoir pris connaissance de l'ensemble des conditions de la présente offre d'achat,\n— Que les informations communiquées sont exactes,\n— Que la présente offre m'engage juridiquement dès son acceptation par le vendeur,\n— Avoir été informé(e) que ce document a été généré à titre informatif et ne constitue pas un conseil juridique personnalisé.\n\nFait le ${formatDateFR(now)} à ${formatTimeFR(now)} — Document horodaté électroniquement par Yoffre.`;
+  const declText = `Je soussigné(e) ${acheteurNomComplet}${conjointNomComplet ? `, agissant conjointement avec ${conjointNomComplet},` : ","} déclare :\n\n— Avoir pris connaissance de l'ensemble des conditions de la présente offre d'achat,\n— Que les informations communiquées sont exactes,\n— Que la présente offre m'engage juridiquement dès son acceptation par le vendeur,\n— Avoir été informé(e) que Yoffre met à disposition un outil de rédaction et ne fournit pas de conseil juridique individualisé.\n\nFait le ${formatDateFR(now)} à ${formatTimeFR(now)} — Document horodaté électroniquement par Yoffre.`;
   const declLines = doc.splitTextToSize(declText, mw - 14);
   const declH = declLines.length * 3.8 + 12;
   // Border box
@@ -407,7 +450,7 @@ export function generateOfferPdf(offer: any, offerClauses: any[], vendorResponse
     doc.addPage();
     addMiniHeader();
     y += 10;
-    const acceptText = `Le vendeur ${vendorResponse.vendeur_nom || offer.vendeur_nom} a accepté la présente offre d'achat en date du ${vendorResponse.responded_at ? formatDateFR(new Date(vendorResponse.responded_at)) : "N/A"} à ${vendorResponse.responded_at ? formatTimeFR(new Date(vendorResponse.responded_at)) : "N/A"}.\n\nAdresse IP d'enregistrement : ${vendorResponse.ip_address || "N/A"}\nRéférence horodatage : ${offerId}\n\nCette acceptation forme un contrat au sens de l'article 1113 du Code civil. Les parties sont invitées à régulariser un compromis de vente dans les meilleurs délais.`;
+    const acceptText = `Le vendeur ${vendorResponse.vendeur_nom || vendeurNomComplet} a accepté la présente offre d'achat en date du ${vendorResponse.responded_at ? formatDateFR(new Date(vendorResponse.responded_at)) : "N/A"} à ${vendorResponse.responded_at ? formatTimeFR(new Date(vendorResponse.responded_at)) : "N/A"}.\n\nAdresse IP d'enregistrement : ${vendorResponse.ip_address || "N/A"}\nRéférence horodatage : ${offerId}\n\nCette acceptation forme un contrat au sens de l'article 1113 du Code civil. Les parties sont invitées à régulariser un compromis de vente dans les meilleurs délais.`;
     const aLines = doc.splitTextToSize(acceptText, mw - 16);
     const aH = aLines.length * 4 + 20;
     drawBox(margin, y, mw, aH, [220, 252, 231], [34, 197, 94]);

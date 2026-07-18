@@ -43,7 +43,7 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-background">
       {/* Admin Header */}
-      <header className="bg-[hsl(213,52%,24%)] text-white">
+      <header className="bg-primary text-white">
         <div className="container flex items-center justify-between py-4">
           <div>
             <h1 className="text-xl font-bold tracking-tight">YOFFRE — Administration</h1>

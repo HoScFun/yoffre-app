@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Lock, ArrowLeft } from "lucide-react";
+import { ShieldCheck, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OfferFormData } from "@/types/offer";
 
@@ -41,35 +42,63 @@ export function Step3Clauses({ data, onChange, onGoToStep }: Step3Props) {
     if ((c as any).active === false) return false;
     if (isComptant && isPretClause(c.title)) return false;
     if (!c.profils || c.profils.length === 0) return true;
-    return c.profils.includes(data.profil_type);
+    return c.profils.includes("tous") || c.profils.includes(data.profil_type);
   });
 
-  const toggleClause = (clauseId: number, obligatoire: boolean) => {
-    if (obligatoire) return;
-    const clause = filteredClauses?.find((c) => c.id === clauseId);
-    if (clause && isPret && isPretClause(clause.title)) return;
-
-    const selected = data.selectedClauses.includes(clauseId)
+  // Toutes les clauses sont décochables : retirer une clause auto-proposée (obligatoire ou prêt)
+  // la mémorise dans removedClauses pour qu'elle ne soit pas re-cochée automatiquement.
+  const toggleClause = (clauseId: number, autoProposed: boolean) => {
+    const isSelected = data.selectedClauses.includes(clauseId);
+    const selected = isSelected
       ? data.selectedClauses.filter((id) => id !== clauseId)
       : [...data.selectedClauses, clauseId];
-    onChange({ selectedClauses: selected });
+    const removed = isSelected
+      ? (autoProposed ? [...new Set([...data.removedClauses, clauseId])] : data.removedClauses)
+      : data.removedClauses.filter((id) => id !== clauseId);
+    onChange({ selectedClauses: selected, removedClauses: removed });
   };
 
-  // Auto-select mandatory clauses + loan clause if pret
+  // Auto-select mandatory clauses + loan clause if pret (en effet, pas pendant le rendu),
+  // sauf celles que l'utilisateur a explicitement retirées.
   const mandatoryClauses = filteredClauses?.filter((c) => c.obligatoire).map((c) => c.id) || [];
   const pretClauseIds = isPret
     ? (filteredClauses?.filter((c) => isPretClause(c.title)).map((c) => c.id) || [])
     : [];
-  const allSelected = [...new Set([...data.selectedClauses, ...mandatoryClauses, ...pretClauseIds])];
-  if (allSelected.length !== data.selectedClauses.length) {
-    onChange({ selectedClauses: allSelected });
-  }
+  const removedClauses = data.removedClauses || [];
+  const autoIds = [...mandatoryClauses, ...pretClauseIds].filter((id) => !removedClauses.includes(id));
+  const allSelected = [...new Set([...data.selectedClauses, ...autoIds])];
+  useEffect(() => {
+    if (allSelected.length !== data.selectedClauses.length) {
+      onChange({ selectedClauses: allSelected });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allSelected.length, data.selectedClauses.length]);
 
   const showPretFields = filteredClauses?.some(
     (c) => isPretClause(c.title) && data.selectedClauses.includes(c.id)
   );
 
   const pretLockedFromStep2 = isPret;
+
+  const NOTE_MAX = 500;
+  const setClauseNote = (clauseId: number, note: string) => {
+    if (note.length > NOTE_MAX) return;
+    const notes = { ...data.clauseNotes };
+    if (note.trim().length === 0) delete notes[clauseId];
+    else notes[clauseId] = note;
+    onChange({ clauseNotes: notes });
+  };
+
+  // Le texte des clauses porte déjà les unités (« [MONTANT] € », « [TAUX]% », « [DUREE] mois ») :
+  // on substitue les valeurs nues pour éviter les doublons.
+  const clauseDescription = (clause: { description: string }) => {
+    let desc = clause.description || "";
+    if (data.clauseValues.valeur_montant_pret)
+      desc = desc.replace("[MONTANT]", data.clauseValues.valeur_montant_pret.toLocaleString("fr-FR"));
+    if (data.clauseValues.valeur_taux_max) desc = desc.replace("[TAUX]", String(data.clauseValues.valeur_taux_max));
+    if (data.clauseValues.valeur_duree_pret) desc = desc.replace("[DUREE]", String(data.clauseValues.valeur_duree_pret));
+    return desc;
+  };
 
   return (
     <div>
@@ -84,40 +113,72 @@ export function Step3Clauses({ data, onChange, onGoToStep }: Step3Props) {
           {filteredClauses?.map((clause) => {
             const isSelected = data.selectedClauses.includes(clause.id);
             const isMandatory = clause.obligatoire === true;
-            const isPretLocked = isPret && isPretClause(clause.title);
+            const isPretAuto = isPret && isPretClause(clause.title);
+            const isAutoProposed = isMandatory || isPretAuto;
 
             return (
               <Card
                 key={clause.id}
                 className={cn(
                   "cursor-pointer transition-all",
-                  isSelected && "ring-1 ring-primary/30 bg-primary/5",
-                  (isMandatory || isPretLocked) && "cursor-default"
+                  isSelected && "ring-1 ring-primary/30 bg-primary/5"
                 )}
-                onClick={() => toggleClause(clause.id, isMandatory || isPretLocked)}
+                onClick={() => toggleClause(clause.id, isAutoProposed)}
               >
                 <CardContent className="p-4 flex items-start gap-3">
-                  {isMandatory || isPretLocked ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="mt-0.5">
-                          <Checkbox checked disabled className="opacity-70" />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {isPretLocked ? "Ajoutée automatiquement (financement par prêt)" : "Clause obligatoire — ne peut pas être désactivée"}
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    <Checkbox checked={isSelected} className="mt-0.5" />
-                  )}
+                  <Checkbox checked={isSelected} className="mt-0.5" />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-sm">{clause.title}</p>
-                      {(isMandatory || isPretLocked) && <Lock className="h-3 w-3 text-muted-foreground" />}
+                      {isAutoProposed && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">
+                              <ShieldCheck className="h-3 w-3" /> Recommandée
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {isPretAuto
+                              ? "Ajoutée automatiquement car vous financez par un prêt. Vous pouvez la retirer, à vos risques."
+                              : "Clause fortement recommandée. Vous pouvez la retirer, à vos risques."}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
+                    {isAutoProposed && !isSelected && (
+                      <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-900 leading-relaxed">
+                        {isPretAuto
+                          ? "⚠️ Sans cette clause, votre dépôt de garantie n'est plus protégé en cas de refus de prêt (loi Scrivener, art. L.313-41 C. conso). Ne la retirez que si votre financement est absolument certain."
+                          : "⚠️ Cette clause protège vos intérêts fondamentaux. La retirer rend votre offre plus engageante pour le vendeur, mais vous expose à un risque juridique réel."}
+                      </p>
+                    )}
                     {clause.base_legale && (
                       <p className="text-xs text-muted-foreground mt-1">{clause.base_legale}</p>
+                    )}
+                    {isSelected && (
+                      <div className="mt-3 space-y-2" onClick={(e) => e.stopPropagation()}>
+                        <p className="text-xs text-muted-foreground leading-relaxed rounded-md bg-muted/50 p-2.5">
+                          {clauseDescription(clause)}
+                        </p>
+                        <div className="space-y-1">
+                          <Label htmlFor={`clause_note_${clause.id}`} className="text-xs text-muted-foreground">
+                            Précision à ajouter à cette clause (optionnel)
+                          </Label>
+                          <textarea
+                            id={`clause_note_${clause.id}`}
+                            value={data.clauseNotes[clause.id] || ""}
+                            onChange={(e) => setClauseNote(clause.id, e.target.value)}
+                            rows={2}
+                            placeholder="Ex : sous réserve de la levée de l'hypothèque avant le 30 septembre…"
+                            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y"
+                          />
+                          {(data.clauseNotes[clause.id] || "").length > 0 && (
+                            <p className="text-[10px] text-muted-foreground text-right">
+                              {(data.clauseNotes[clause.id] || "").length} / {NOTE_MAX}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </CardContent>

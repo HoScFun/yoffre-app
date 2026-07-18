@@ -70,9 +70,13 @@ const NewOffer = () => {
     if (!session || !user || !profile) return;
     const isAnon = (user as any).is_anonymous === true;
     if (!isAnon && profile) {
+      // full_name du profil = "Prénom Nom" : on répartit sur les deux champs
+      const [profilePrenom, ...profileNomParts] = (profile.full_name || "").trim().split(/\s+/);
+      const profileNom = profileNomParts.join(" ");
       setData((prev) => ({
         ...prev,
-        acheteur_nom: prev.acheteur_nom || profile.full_name || "",
+        acheteur_prenom: prev.acheteur_prenom || (profileNom ? profilePrenom : "") || "",
+        acheteur_nom: prev.acheteur_nom || profileNom || profilePrenom || "",
         acheteur_email: prev.acheteur_email || profile.email || user.email || "",
       }));
     }
@@ -118,6 +122,7 @@ const NewOffer = () => {
       valeur_montant_pret: data.clauseValues.valeur_montant_pret || null,
       valeur_taux_max: data.clauseValues.valeur_taux_max || null,
       valeur_duree_pret: data.clauseValues.valeur_duree_pret || null,
+      notes_custom: data.clauseNotes[c.id]?.trim() || null,
     }));
   };
 
@@ -163,18 +168,32 @@ const NewOffer = () => {
         .insert({
           user_id: user.id,
           profil_type: data.profil_type,
+          professionnel_type: data.profil_type === "professionnel" ? data.professionnel_type || null : null,
+          acheteur_denomination: data.profil_type === "professionnel" ? data.acheteur_denomination || null : null,
+          acheteur_siren: data.profil_type === "professionnel" ? data.acheteur_siren || null : null,
+          acheteur_civilite: data.acheteur_civilite || null,
+          acheteur_prenom: data.acheteur_prenom || null,
           acheteur_nom: data.acheteur_nom,
+          acheteur_situation: data.acheteur_situation || null,
+          conjoint_prenom: data.conjoint_prenom || null,
+          conjoint_nom: data.conjoint_nom || null,
           acheteur_email: data.acheteur_email,
           acheteur_telephone: data.acheteur_telephone || null,
           acheteur_adresse: data.acheteur_adresse || null,
+          acheteur_adresse_details: data.acheteur_adresse_details as any,
           bien_adresse: data.bien_adresse,
+          bien_adresse_details: data.bien_adresse_details as any,
           bien_type: data.bien_type,
           bien_prix_affiche: data.bien_prix_affiche ? parseFloat(data.bien_prix_affiche) : null,
           bien_prix_propose: parseFloat(data.bien_prix_propose),
           delai_validite_jours: data.delai_validite_jours,
+          date_signature_souhaitee: data.date_signature_souhaitee || null,
+          vendeur_civilite: data.vendeur_civilite || null,
+          vendeur_prenom: data.vendeur_prenom || null,
           vendeur_nom: data.vendeur_nom,
           vendeur_email: data.vendeur_email,
           vendeur_adresse: data.vendeur_adresse || null,
+          vendeur_adresse_details: data.vendeur_adresse_details as any,
           notaire_email: data.notaire_email || null,
           agent_immobilier: data.agent.enabled,
           financement: data.financement || null,
@@ -197,6 +216,7 @@ const NewOffer = () => {
         valeur_montant_pret: data.clauseValues.valeur_montant_pret || null,
         valeur_taux_max: data.clauseValues.valeur_taux_max || null,
         valeur_duree_pret: data.clauseValues.valeur_duree_pret || null,
+        notes_custom: data.clauseNotes[clauseId]?.trim() || null,
       }));
 
       if (clauseInserts.length > 0) {

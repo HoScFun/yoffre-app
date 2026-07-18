@@ -23,17 +23,17 @@ function emailWrapper(title: string, body: string): string {
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:32px 0;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
-  <tr><td style="background:#1E3A5F;padding:28px 32px;text-align:center;">
+  <tr><td style="background:#246BFD;padding:28px 32px;text-align:center;">
     <span style="color:#ffffff;font-size:24px;font-weight:bold;letter-spacing:4px;text-transform:uppercase;">YOFFRE</span>
     <br><span style="color:#94a3b8;font-size:12px;letter-spacing:1px;">Offre d'achat immobilier</span>
   </td></tr>
   <tr><td style="padding:32px;">
-    <h2 style="color:#1E3A5F;margin:0 0 20px;">${title}</h2>
+    <h2 style="color:#246BFD;margin:0 0 20px;">${title}</h2>
     ${body}
   </td></tr>
   <tr><td style="padding:20px 32px;background:#f9fafb;text-align:center;">
     <p style="color:#9ca3af;font-size:12px;margin:0 0 8px;">yoffre.fr — Générez votre offre d'achat en 5 minutes</p>
-    <a href="${SITE_URL}/nouvelle-offre" style="color:#1E3A5F;font-size:11px;text-decoration:underline;">Créer ma propre offre →</a>
+    <a href="${SITE_URL}/nouvelle-offre" style="color:#246BFD;font-size:11px;text-decoration:underline;">Créer ma propre offre →</a>
   </td></tr>
 </table>
 </td></tr></table>
@@ -49,7 +49,7 @@ function recapBlock(offer: any, expirationDate: string): string {
   </div>`;
 }
 
-function button(text: string, url: string, color = "#22C55E"): string {
+function button(text: string, url: string, color = "#10A878"): string {
   return `<p style="text-align:center;margin:24px 0;">
     <a href="${url}" style="display:inline-block;padding:14px 28px;background:${color};color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;font-size:15px;">${escapeHtml(text)}</a>
   </p>`;
@@ -58,7 +58,7 @@ function button(text: string, url: string, color = "#22C55E"): string {
 function ctaSecondaire(text: string, url: string): string {
   return `<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;text-align:center;">
     <p style="color:#9ca3af;font-size:12px;margin:0;">${escapeHtml(text)}</p>
-    <a href="${url}" style="color:#1E3A5F;font-size:11px;text-decoration:underline;">En savoir plus →</a>
+    <a href="${url}" style="color:#246BFD;font-size:11px;text-decoration:underline;">En savoir plus →</a>
   </div>`;
 }
 
@@ -131,6 +131,10 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Rétrocompatible : anciennes offres sans prénom → nom seul (contient le nom complet)
+    const acheteurNom = [offer.acheteur_prenom, offer.acheteur_nom].filter(Boolean).join(" ");
+    const vendeurNom = [offer.vendeur_prenom, offer.vendeur_nom].filter(Boolean).join(" ");
+
     let agent = null;
     if (offer.agent_immobilier) {
       const { data: agentData } = await supabase.from("agents").select("*").eq("offer_id", offerId).single();
@@ -186,9 +190,9 @@ Deno.serve(async (req) => {
           offer.vendeur_email,
           `Offre d'achat pour votre bien — ${escapeHtml(offer.bien_adresse)}`,
           emailWrapper("Vous avez reçu une offre d'achat", `
-            <p><strong>${escapeHtml(offer.acheteur_nom)}</strong> vous fait une offre d'achat pour le bien suivant :</p>
+            <p><strong>${escapeHtml(acheteurNom)}</strong> vous fait une offre d'achat pour le bien suivant :</p>
             ${recap}
-            <p><strong>Acheteur :</strong> ${escapeHtml(offer.acheteur_nom)} (${escapeHtml(offer.acheteur_email)})</p>
+            <p><strong>Acheteur :</strong> ${escapeHtml(acheteurNom)} (${escapeHtml(offer.acheteur_email)})</p>
             ${messageBlock}
             ${button("Consulter et répondre à cette offre", vendorLink)}
             <p style="color:#9ca3af;font-size:12px;text-align:center;">Vous n'avez pas besoin de créer un compte. Ce lien est personnel et sécurisé.</p>
@@ -202,10 +206,10 @@ Deno.serve(async (req) => {
           offer.acheteur_email,
           `Votre offre d'achat — ${escapeHtml(offer.bien_adresse)}`,
           emailWrapper("Votre offre a bien été envoyée", `
-            <p>Votre offre pour le bien situé au <strong>${escapeHtml(offer.bien_adresse)}</strong> a été transmise à <strong>${escapeHtml(offer.vendeur_nom)}</strong>.</p>
+            <p>Votre offre pour le bien situé au <strong>${escapeHtml(offer.bien_adresse)}</strong> a été transmise à <strong>${escapeHtml(vendeurNom)}</strong>.</p>
             ${recap}
             <p>Vous serez notifié dès qu'il répond.</p>
-            ${button("Suivre mon offre", `${SITE_URL}/dashboard`, "#1E3A5F")}
+            ${button("Suivre mon offre", `${SITE_URL}/dashboard`, "#246BFD")}
             ${ctaSecondaire("Besoin d'un prêt immobilier ? Nos partenaires courtiers vous accompagnent gratuitement.", SITE_URL)}
           `)
         );
@@ -217,8 +221,8 @@ Deno.serve(async (req) => {
             `Copie — Offre d'achat ${escapeHtml(offer.bien_adresse)}`,
             emailWrapper("Vous êtes désigné comme notaire dans le cadre de cette transaction", `
               <p>Une offre d'achat a été transmise entre les parties suivantes :</p>
-              <p><strong>Acheteur :</strong> ${escapeHtml(offer.acheteur_nom)} (${escapeHtml(offer.acheteur_email)})</p>
-              <p><strong>Vendeur :</strong> ${escapeHtml(offer.vendeur_nom)} (${escapeHtml(offer.vendeur_email)})</p>
+              <p><strong>Acheteur :</strong> ${escapeHtml(acheteurNom)} (${escapeHtml(offer.acheteur_email)})</p>
+              <p><strong>Vendeur :</strong> ${escapeHtml(vendeurNom)} (${escapeHtml(offer.vendeur_email)})</p>
               ${recap}
               <p>Cette offre vous est transmise à titre d'information.</p>
             `),
@@ -232,7 +236,7 @@ Deno.serve(async (req) => {
             agent.email,
             `Offre transmise pour votre bien — ${escapeHtml(offer.bien_adresse)}`,
             emailWrapper("Votre client vient de transmettre une offre", `
-              <p><strong>${escapeHtml(offer.acheteur_nom)}</strong> a fait une offre de <strong>${Number(offer.bien_prix_propose).toLocaleString("fr-FR")} €</strong> pour le bien situé au <strong>${escapeHtml(offer.bien_adresse)}</strong>.</p>
+              <p><strong>${escapeHtml(acheteurNom)}</strong> a fait une offre de <strong>${Number(offer.bien_prix_propose).toLocaleString("fr-FR")} €</strong> pour le bien situé au <strong>${escapeHtml(offer.bien_adresse)}</strong>.</p>
               ${recap}
             `),
             offer.acheteur_email
@@ -247,7 +251,7 @@ Deno.serve(async (req) => {
             <p>Votre offre pour le bien situé au <strong>${escapeHtml(offer.bien_adresse)}</strong> est prête.</p>
             ${recap}
             <p>Retrouvez le PDF dans votre espace. Envoyez-le au vendeur quand vous êtes prêt.</p>
-            ${button("Accéder à mon espace", `${SITE_URL}/dashboard`, "#1E3A5F")}
+            ${button("Accéder à mon espace", `${SITE_URL}/dashboard`, "#246BFD")}
             ${ctaSecondaire("Besoin d'un prêt immobilier ? Nos partenaires courtiers vous accompagnent gratuitement.", SITE_URL)}
           `)
         );
@@ -270,9 +274,9 @@ Deno.serve(async (req) => {
         offer.acheteur_email,
         accepted ? `✓ Votre offre a été acceptée — Yoffre` : `Votre offre a été refusée — Yoffre`,
         emailWrapper(`Votre offre a été ${label}`, `
-          <p>Le vendeur <strong>${escapeHtml(vendorResponse?.vendeur_nom || offer.vendeur_nom)}</strong> a <strong>${label}</strong> votre offre pour le bien situé au <strong>${escapeHtml(offer.bien_adresse)}</strong>.</p>
+          <p>Le vendeur <strong>${escapeHtml(vendorResponse?.vendeur_nom || vendeurNom)}</strong> a <strong>${label}</strong> votre offre pour le bien situé au <strong>${escapeHtml(offer.bien_adresse)}</strong>.</p>
           <p><strong>Date de réponse :</strong> ${responseDate}</p>
-          ${accepted ? button("Voir l'offre acceptée", `${SITE_URL}/offre/${offer.id}`, "#22C55E") : ""}
+          ${accepted ? button("Voir l'offre acceptée", `${SITE_URL}/offre/${offer.id}`, "#10A878") : ""}
         `)
       );
 
@@ -292,7 +296,7 @@ Deno.serve(async (req) => {
           agent.email,
           `Offre ${label} pour ${escapeHtml(offer.bien_adresse)}`,
           emailWrapper(`Offre ${LABEL}`, `
-            <p>L'offre de votre client <strong>${escapeHtml(offer.acheteur_nom)}</strong> pour le bien situé au <strong>${escapeHtml(offer.bien_adresse)}</strong> a été <strong>${label}</strong> par le vendeur.</p>
+            <p>L'offre de votre client <strong>${escapeHtml(acheteurNom)}</strong> pour le bien situé au <strong>${escapeHtml(offer.bien_adresse)}</strong> a été <strong>${label}</strong> par le vendeur.</p>
             <p><strong>Date :</strong> ${responseDate}</p>
           `)
         );

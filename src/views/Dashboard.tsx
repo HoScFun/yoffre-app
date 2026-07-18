@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { supabase } from "@/integrations/supabase/client";
+import { fullName } from "@/types/offer";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Eye, Download, Link2, FileText } from "lucide-react";
@@ -85,7 +86,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-primary">Mes offres</h1>
           <Link href="/nouvelle-offre">
-            <Button style={{ backgroundColor: "#1E3A5F" }} className="text-white hover:opacity-90">
+            <Button className="bg-primary text-white hover:bg-primary/90">
               <Plus className="h-4 w-4 mr-2" />
               Nouvelle offre
             </Button>
@@ -99,7 +100,7 @@ const Dashboard = () => {
             <FileText className="h-16 w-16 text-muted-foreground/40 mb-4" />
             <p className="text-lg text-muted-foreground mb-6">Vous n'avez pas encore créé d'offre.</p>
             <Link href="/nouvelle-offre">
-              <Button style={{ backgroundColor: "#1E3A5F" }} className="text-white hover:opacity-90">
+              <Button className="bg-primary text-white hover:bg-primary/90">
                 Créer ma première offre
               </Button>
             </Link>
@@ -147,7 +148,7 @@ const Dashboard = () => {
                             ? offer.bien_adresse.substring(0, 40) + "…"
                             : offer.bien_adresse}
                         </TableCell>
-                        <TableCell>{offer.vendeur_nom}</TableCell>
+                        <TableCell>{fullName(offer.vendeur_prenom, offer.vendeur_nom)}</TableCell>
                         <TableCell className="text-right font-medium">
                           {Number(offer.bien_prix_propose).toLocaleString("fr-FR")} €
                         </TableCell>

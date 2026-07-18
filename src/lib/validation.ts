@@ -51,20 +51,40 @@ export function validateAddress(value: string): string | null {
   if (!value || value.trim().length === 0) return "L'adresse est obligatoire.";
   const generic = genericTextCheck(value, 200);
   if (generic) return generic;
-  if (value.trim().length < 10) return "L'adresse doit inclure un numéro, une rue, un code postal et une ville. Ex : 15 rue des Lilas, 75011 Paris, France";
-  // Must start with a number (street number)
-  if (!/^\d/.test(value.trim())) return "L'adresse doit inclure un numéro, une rue, un code postal et une ville. Ex : 15 rue des Lilas, 75011 Paris, France";
-  // Must contain a 5-digit postal code
+  if (value.trim().length < 10) return "L'adresse doit inclure la rue, un code postal et une ville. Ex : 15 rue des Lilas 75011 Paris";
+  // Must contain a 5-digit postal code (un lieu-dit BAN peut ne pas avoir de numéro de rue)
   const cpMatch = value.match(/\b(\d{5})\b/);
-  if (!cpMatch) return "L'adresse doit inclure un numéro, une rue, un code postal et une ville. Ex : 15 rue des Lilas, 75011 Paris, France";
+  if (!cpMatch) return "L'adresse doit inclure la rue, un code postal et une ville. Ex : 15 rue des Lilas 75011 Paris";
   const cp = cpMatch[1];
   if (INVALID_CP.includes(cp)) return "Code postal invalide.";
   const dept = cp.substring(0, 2);
   if (!VALID_DEPT_PREFIXES.includes(dept)) return "Code postal invalide.";
   // Must have at least 2 chars after the postal code (city)
   const afterCp = value.substring(value.indexOf(cp) + 5).trim();
-  if (afterCp.length < 2) return "L'adresse doit inclure un numéro, une rue, un code postal et une ville. Ex : 15 rue des Lilas, 75011 Paris, France";
+  if (afterCp.length < 2) return "L'adresse doit inclure la rue, un code postal et une ville. Ex : 15 rue des Lilas 75011 Paris";
   return null;
+}
+
+// ─── First name / last name (champs séparés) ───
+
+export function validateFirstName(value: string): string | null {
+  if (!value || value.trim().length === 0) return "Le prénom est obligatoire.";
+  return validateName(value, false) === null ? null : "Veuillez entrer un prénom valide.";
+}
+
+export function validateLastName(value: string): string | null {
+  if (!value || value.trim().length === 0) return "Le nom est obligatoire.";
+  return validateName(value, false) === null ? null : "Veuillez entrer un nom valide.";
+}
+
+export function validateOptionalFirstName(value: string): string | null {
+  if (!value || value.trim().length === 0) return null;
+  return validateName(value, false) === null ? null : "Veuillez entrer un prénom valide.";
+}
+
+export function validateOptionalLastName(value: string): string | null {
+  if (!value || value.trim().length === 0) return null;
+  return validateName(value, false) === null ? null : "Veuillez entrer un nom valide.";
 }
 
 // ─── Name ───
@@ -200,6 +220,21 @@ export function validateDelaiValidite(value: number): string | null {
   return null;
 }
 
+// ─── Date de signature souhaitée (vente à terme) ───
+
+export function validateDateSignature(value: string): string | null {
+  if (!value || value.trim().length === 0) return null; // optionnel
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "Date invalide.";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (d <= today) return "La date de signature doit être dans le futur.";
+  const max = new Date();
+  max.setFullYear(max.getFullYear() + 5);
+  if (d > max) return "La date de signature semble trop lointaine (max. 5 ans).";
+  return null;
+}
+
 // ─── Carte T ───
 
 export function validateCarteT(value: string): string | null {
@@ -225,7 +260,10 @@ export interface FieldError {
 
 export function validateStep2(data: any): FieldError {
   const errors: FieldError = {};
-  errors.acheteur_nom = validateName(data.acheteur_nom);
+  errors.acheteur_prenom = validateFirstName(data.acheteur_prenom);
+  errors.acheteur_nom = validateLastName(data.acheteur_nom);
+  errors.conjoint_prenom = validateOptionalFirstName(data.conjoint_prenom || "");
+  errors.conjoint_nom = validateOptionalLastName(data.conjoint_nom || "");
   errors.acheteur_email = validateEmail(data.acheteur_email);
   errors.acheteur_telephone = validatePhone(data.acheteur_telephone);
   errors.acheteur_adresse = validateAddress(data.acheteur_adresse);
@@ -233,7 +271,9 @@ export function validateStep2(data: any): FieldError {
   errors.bien_prix_affiche = validatePrixAffiche(data.bien_prix_affiche);
   errors.bien_prix_propose = validatePrice(data.bien_prix_propose, data.bien_prix_affiche);
   errors.delai_validite_jours = validateDelaiValidite(data.delai_validite_jours);
-  errors.vendeur_nom = validateName(data.vendeur_nom);
+  errors.date_signature_souhaitee = validateDateSignature(data.date_signature_souhaitee || "");
+  errors.vendeur_prenom = validateOptionalFirstName(data.vendeur_prenom);
+  errors.vendeur_nom = validateLastName(data.vendeur_nom);
   errors.vendeur_email = validateEmail(data.vendeur_email);
   errors.vendeur_adresse = validateAddress(data.vendeur_adresse);
 

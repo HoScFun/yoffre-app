@@ -11,14 +11,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Card, CardContent } from "@/components/ui/card";
 import { Info, CreditCard, Banknote, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { OfferFormData } from "@/types/offer";
+import { OfferFormData, situationLabels, civiliteLabels, SITUATIONS_AVEC_CONJOINT } from "@/types/offer";
 import { ValidatedInput, ValidatedTextarea } from "@/components/ui/validated-input";
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
+import { CompanyAutocomplete } from "@/components/ui/company-autocomplete";
 import {
   validateName, validateEmail, validatePhone, validateAddress,
+  validateFirstName, validateLastName, validateOptionalFirstName, validateOptionalLastName,
   validatePrice, validatePrixAffiche, validateDelaiValidite,
   validateMontantPret, validateTauxMax, validateDureePret,
   validateAgencyName, validateCarteT, validateOptionalEmail,
-  formatPhoneDisplay,
+  validateDateSignature, formatPhoneDisplay,
 } from "@/lib/validation";
 
 interface Step2Props {
@@ -97,14 +100,62 @@ export function Step2Info({ data, onChange }: Step2Props) {
       <h3 className="text-xl font-bold text-primary mb-2">Informations de l'offre</h3>
 
       <SectionTitle>Vos informations</SectionTitle>
+      {data.profil_type === "professionnel" && (
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="acheteur_denomination">Raison sociale de votre structure</Label>
+            <CompanyAutocomplete
+              id="acheteur_denomination"
+              value={data.acheteur_denomination}
+              onChange={(value, details) =>
+                onChange({
+                  acheteur_denomination: value,
+                  acheteur_siren: details?.siren || "",
+                  ...(details?.adresse && !data.acheteur_adresse
+                    ? { acheteur_adresse: details.adresse }
+                    : {}),
+                })
+              }
+              placeholder="Commencez à taper le nom de la société…"
+            />
+            {data.acheteur_siren && (
+              <p className="text-xs text-muted-foreground">
+                SIREN : {data.acheteur_siren} — l&apos;adresse du siège a été proposée dans le champ adresse si celui-ci était vide.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
       <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="acheteur_nom">Nom complet *</Label>
+          <Label htmlFor="acheteur_civilite">Civilité</Label>
+          <Select value={data.acheteur_civilite} onValueChange={(v) => onChange({ acheteur_civilite: v })}>
+            <SelectTrigger id="acheteur_civilite">
+              <SelectValue placeholder="Monsieur / Madame" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(civiliteLabels).map(([value, label]) => (
+                <SelectItem key={value} value={value}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="acheteur_prenom">Prénom *</Label>
+          <ValidatedInput
+            id="acheteur_prenom"
+            value={data.acheteur_prenom}
+            onChange={(e) => onChange({ acheteur_prenom: e.target.value })}
+            validate={validateFirstName}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="acheteur_nom">Nom *</Label>
           <ValidatedInput
             id="acheteur_nom"
             value={data.acheteur_nom}
             onChange={(e) => onChange({ acheteur_nom: e.target.value })}
-            validate={(v) => validateName(v)}
+            validate={validateLastName}
           />
         </div>
         <div className="space-y-2">
@@ -127,26 +178,75 @@ export function Step2Info({ data, onChange }: Step2Props) {
             onBlur={() => handlePhoneBlur("acheteur_telephone")}
           />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 md:col-span-2">
           <Label htmlFor="acheteur_adresse">Adresse complète *</Label>
-          <ValidatedInput
+          <AddressAutocomplete
             id="acheteur_adresse"
             value={data.acheteur_adresse}
-            onChange={(e) => onChange({ acheteur_adresse: e.target.value })}
+            onChange={(value, details) => onChange({ acheteur_adresse: value, acheteur_adresse_details: details })}
             validate={validateAddress}
           />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="acheteur_situation">Situation familiale</Label>
+          <Select
+            value={data.acheteur_situation}
+            onValueChange={(v) =>
+              onChange(
+                SITUATIONS_AVEC_CONJOINT.includes(v)
+                  ? { acheteur_situation: v }
+                  : { acheteur_situation: v, conjoint_prenom: "", conjoint_nom: "" }
+              )
+            }
+          >
+            <SelectTrigger id="acheteur_situation">
+              <SelectValue placeholder="Sélectionnez (optionnel)" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(situationLabels).map(([value, label]) => (
+                <SelectItem key={value} value={value}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {SITUATIONS_AVEC_CONJOINT.includes(data.acheteur_situation) && (
+          <>
+            <div className="hidden md:block" />
+            <div className="space-y-2">
+              <Label htmlFor="conjoint_prenom">Prénom du conjoint / partenaire</Label>
+              <ValidatedInput
+                id="conjoint_prenom"
+                value={data.conjoint_prenom}
+                onChange={(e) => onChange({ conjoint_prenom: e.target.value })}
+                validate={validateOptionalFirstName}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="conjoint_nom">Nom du conjoint / partenaire</Label>
+              <ValidatedInput
+                id="conjoint_nom"
+                value={data.conjoint_nom}
+                onChange={(e) => onChange({ conjoint_nom: e.target.value })}
+                validate={validateOptionalLastName}
+              />
+            </div>
+            <p className="md:col-span-2 text-xs text-muted-foreground -mt-1">
+              Si vous achetez à deux, votre conjoint ou partenaire apparaîtra comme co-acquéreur dans l&apos;offre.
+            </p>
+          </>
+        )}
       </div>
 
       <SectionTitle>Le bien</SectionTitle>
       <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="bien_adresse">Adresse complète du bien *</Label>
-          <ValidatedInput
+          <AddressAutocomplete
             id="bien_adresse"
             value={data.bien_adresse}
-            onChange={(e) => onChange({ bien_adresse: e.target.value })}
+            onChange={(value, details) => onChange({ bien_adresse: value, bien_adresse_details: details })}
             validate={validateAddress}
+            placeholder="Commencez à taper l'adresse du bien…"
           />
         </div>
         <div className="space-y-2">
@@ -195,6 +295,25 @@ export function Step2Info({ data, onChange }: Step2Props) {
             value={data.delai_validite_jours}
             onChange={(e) => onChange({ delai_validite_jours: parseInt(e.target.value) || 10 })}
             validate={(v) => validateDelaiValidite(parseInt(v) || 0)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="date_signature" className="flex items-center gap-1">
+            Date de signature souhaitée de l&apos;acte
+            <Tooltip>
+              <TooltipTrigger asChild><Info className="h-3.5 w-3.5 text-muted-foreground" /></TooltipTrigger>
+              <TooltipContent>
+                Optionnel. Utile pour une vente à terme ou différée : la date proposée pour la signature
+                de l&apos;acte authentique figurera dans l&apos;offre.
+              </TooltipContent>
+            </Tooltip>
+          </Label>
+          <ValidatedInput
+            id="date_signature"
+            type="date"
+            value={data.date_signature_souhaitee}
+            onChange={(e) => onChange({ date_signature_souhaitee: e.target.value })}
+            validate={validateDateSignature}
           />
         </div>
       </div>
@@ -300,7 +419,17 @@ export function Step2Info({ data, onChange }: Step2Props) {
           <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
             ✓ La condition suspensive d'obtention de prêt sera automatiquement ajoutée à votre offre (Art. L.313-41 Code de la consommation — Loi Scrivener). Elle protège votre dépôt de garantie si le prêt vous est refusé.
           </div>
-          <div className="rounded-lg border p-4 text-sm mt-3" style={{ backgroundColor: "#EFF6FF", borderColor: "#BFDBFE" }}>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm mt-3">
+            <p className="font-medium text-amber-900 mb-1">⚠️ Votre demande de prêt devra correspondre à ces caractéristiques</p>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              Pour rester protégé par la condition suspensive, demandez à votre banque un prêt conforme aux
+              caractéristiques indiquées ci-dessus (montant, durée, taux). Si vous demandez un prêt à des conditions
+              différentes — par exemple un montant supérieur — ou si vous ne déposez aucune demande, la condition est
+              réputée accomplie et vous perdez sa protection, ainsi que, le cas échéant, votre dépôt de garantie
+              (art. 1304-3 du Code civil, jurisprudence constante de la Cour de cassation).
+            </p>
+          </div>
+          <div className="rounded-lg border p-4 text-sm mt-3" style={{ backgroundColor: "#EEF4FF", borderColor: "#C9DAFF" }}>
             <p className="font-medium text-blue-900 mb-1">🏦 Besoin d'un courtier ?</p>
             <p className="text-blue-800 text-xs mb-2">Obtenez le meilleur taux avec Nesto Courtage.</p>
             <a href="https://www.nestocourtage.com" target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-primary hover:underline">
@@ -376,12 +505,35 @@ export function Step2Info({ data, onChange }: Step2Props) {
       <SectionTitle>Vendeur</SectionTitle>
       <div className="grid md:grid-cols-2 gap-4">
         <div className="space-y-2">
+          <Label htmlFor="vendeur_civilite">Civilité du vendeur</Label>
+          <Select value={data.vendeur_civilite} onValueChange={(v) => onChange({ vendeur_civilite: v })}>
+            <SelectTrigger id="vendeur_civilite">
+              <SelectValue placeholder="Monsieur / Madame" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(civiliteLabels).map(([value, label]) => (
+                <SelectItem key={value} value={value}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="vendeur_prenom">Prénom du vendeur</Label>
+          <ValidatedInput
+            id="vendeur_prenom"
+            value={data.vendeur_prenom}
+            onChange={(e) => onChange({ vendeur_prenom: e.target.value })}
+            validate={validateOptionalFirstName}
+            placeholder="Si vous le connaissez"
+          />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="vendeur_nom">Nom du vendeur *</Label>
           <ValidatedInput
             id="vendeur_nom"
             value={data.vendeur_nom}
             onChange={(e) => onChange({ vendeur_nom: e.target.value })}
-            validate={(v) => validateName(v)}
+            validate={validateLastName}
           />
         </div>
         <div className="space-y-2">
@@ -404,11 +556,12 @@ export function Step2Info({ data, onChange }: Step2Props) {
         </div>
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="vendeur_adresse">Adresse postale du vendeur *</Label>
-          <ValidatedInput
+          <AddressAutocomplete
             id="vendeur_adresse"
             value={data.vendeur_adresse}
-            onChange={(e) => onChange({ vendeur_adresse: e.target.value })}
+            onChange={(value, details) => onChange({ vendeur_adresse: value, vendeur_adresse_details: details })}
             validate={validateAddress}
+            placeholder="Commencez à taper l'adresse du vendeur…"
           />
         </div>
       </div>

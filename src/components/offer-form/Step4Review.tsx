@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { OfferFormData } from "@/types/offer";
+import { OfferFormData, fullName, professionnelTypeLabels, situationLabels, civiliteLabels } from "@/types/offer";
 import { numberToFrenchWords } from "@/lib/pdf";
 import { Mail, FileText, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -48,10 +48,28 @@ export function Step4Review({ data, onChange }: Step4Props) {
         <div>
           <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Acheteur</h4>
           <div className="grid md:grid-cols-2 gap-1.5">
-            <p><span className="text-muted-foreground">Nom :</span> {data.acheteur_nom}</p>
+            <p>
+              <span className="text-muted-foreground">Nom :</span>{" "}
+              {[civiliteLabels[data.acheteur_civilite], fullName(data.acheteur_prenom, data.acheteur_nom)].filter(Boolean).join(" ")}
+            </p>
+            {data.profil_type === "professionnel" && data.acheteur_denomination && (
+              <p>
+                <span className="text-muted-foreground">Structure :</span> {data.acheteur_denomination}
+                {data.acheteur_siren && <span className="text-muted-foreground text-xs ml-1">(SIREN {data.acheteur_siren})</span>}
+              </p>
+            )}
             <p><span className="text-muted-foreground">Email :</span> {data.acheteur_email}</p>
             <p><span className="text-muted-foreground">Tél :</span> {data.acheteur_telephone}</p>
             <p><span className="text-muted-foreground">Adresse :</span> {data.acheteur_adresse}</p>
+            {data.profil_type === "professionnel" && data.professionnel_type && (
+              <p><span className="text-muted-foreground">Qualité :</span> {professionnelTypeLabels[data.professionnel_type] || data.professionnel_type}</p>
+            )}
+            {data.acheteur_situation && (
+              <p><span className="text-muted-foreground">Situation :</span> {situationLabels[data.acheteur_situation] || data.acheteur_situation}</p>
+            )}
+            {fullName(data.conjoint_prenom, data.conjoint_nom) && (
+              <p><span className="text-muted-foreground">Co-acquéreur :</span> {fullName(data.conjoint_prenom, data.conjoint_nom)}</p>
+            )}
           </div>
         </div>
         <Separator />
@@ -109,7 +127,10 @@ export function Step4Review({ data, onChange }: Step4Props) {
         {/* VENDEUR */}
         <div>
           <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Vendeur</h4>
-          <p><span className="text-muted-foreground">Nom :</span> {data.vendeur_nom}</p>
+          <p>
+            <span className="text-muted-foreground">Nom :</span>{" "}
+            {[civiliteLabels[data.vendeur_civilite], fullName(data.vendeur_prenom, data.vendeur_nom)].filter(Boolean).join(" ")}
+          </p>
           <p><span className="text-muted-foreground">Email :</span> {data.vendeur_email}</p>
           <p><span className="text-muted-foreground">Adresse :</span> {data.vendeur_adresse}</p>
         </div>
@@ -154,6 +175,11 @@ export function Step4Review({ data, onChange }: Step4Props) {
                 {c.base_legale && (
                   <span className="text-muted-foreground italic text-xs ml-2">({c.base_legale})</span>
                 )}
+                {data.clauseNotes[c.id] && (
+                  <p className="text-xs text-muted-foreground italic mt-0.5">
+                    Précision : {data.clauseNotes[c.id]}
+                  </p>
+                )}
               </li>
             ))}
           </ol>
@@ -167,6 +193,12 @@ export function Step4Review({ data, onChange }: Step4Props) {
             Cette offre est valable <strong>{data.delai_validite_jours} jours</strong> à compter de son envoi,
             soit jusqu'au <strong>{expirationDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</strong>.
           </p>
+          {data.date_signature_souhaitee && (
+            <p className="mt-1">
+              <span className="text-muted-foreground">Signature de l'acte souhaitée au plus tard le :</span>{" "}
+              <strong>{new Date(data.date_signature_souhaitee).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</strong>
+            </p>
+          )}
         </div>
         <Separator />
 
@@ -225,16 +257,16 @@ export function Step4Review({ data, onChange }: Step4Props) {
         <Separator />
 
         {/* DISCLAIMER */}
-        <div className="flex items-start gap-3 p-4 rounded-lg border border-destructive/30 bg-destructive/5">
+        <div className="flex items-start gap-3 p-4 rounded-lg border border-primary/30 bg-primary/5">
           <Checkbox
             id="disclaimer"
             checked={data.disclaimer_accepted}
             onCheckedChange={(checked) => onChange({ disclaimer_accepted: !!checked })}
           />
           <Label htmlFor="disclaimer" className="text-xs leading-relaxed cursor-pointer">
-            Je reconnais que ce document est généré à titre informatif et ne constitue pas un conseil juridique.
-            Je suis seul(e) responsable de son contenu et de son envoi.
-            Il est recommandé de le faire vérifier par un notaire ou un avocat avant tout envoi.
+            Je comprends que cette offre, si elle est acceptée par le vendeur, m'engage juridiquement.
+            Je confirme l'exactitude des informations renseignées. Yoffre met à disposition un outil de
+            rédaction et ne fournit pas de conseil juridique individualisé.
           </Label>
         </div>
       </div>
