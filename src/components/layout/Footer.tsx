@@ -22,6 +22,13 @@ const jurisprudenceItems = [
   { ref: "Cass. Civ. 3e, 25 mars 2009", desc: "Le droit de préemption doit être mentionné sous peine d'inopposabilité." },
 ];
 
+const internalGuides = [
+  { title: "L'offre d'achat immobilier : le guide complet", href: "/guide-offre-achat" },
+  { title: "Conditions suspensives d'une offre d'achat", href: "/guide-conditions-suspensives" },
+  { title: "Délai de rétractation de 10 jours", href: "/guide-delai-retractation" },
+  { title: "Contre-offre immobilière : effets et négociation", href: "/guide-contre-offre" },
+];
+
 const guideItems = [
   { title: "L'offre d'achat immobilier — Guide pratique", source: "Service-Public.fr", link: "https://www.service-public.fr" },
   { title: "Les conditions suspensives dans la vente immobilière", source: "Conseil Supérieur du Notariat (CSN)", link: "https://www.notaires.fr" },
@@ -61,6 +68,24 @@ export function Footer() {
               {jurisprudenceItems.map((item) => (
                 <li key={item.ref}>
                   <span className="font-medium text-foreground">{item.ref}</span> — {item.desc}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </details>
+
+        <details className="group border rounded-lg mb-2">
+          <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/50 transition-colors list-none flex items-center justify-between">
+            Nos guides
+            <span className="text-muted-foreground group-open:rotate-180 transition-transform">▾</span>
+          </summary>
+          <div className="px-4 pb-4">
+            <ul className="space-y-2 text-sm">
+              {internalGuides.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className="text-primary hover:underline">
+                    {item.title}
+                  </Link>
                 </li>
               ))}
             </ul>

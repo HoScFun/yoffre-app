@@ -131,6 +131,27 @@ export default function GuidePage() {
           </ul>
         </section>
 
+        <section className="mb-10">
+          <h2 className="text-xl font-bold text-primary mb-3">Pour aller plus loin</h2>
+          <ul className="text-sm leading-relaxed space-y-2 list-disc pl-5">
+            <li>
+              <Link href="/guide-conditions-suspensives" className="text-primary hover:underline">
+                Conditions suspensives : lesquelles prévoir et comment les rédiger
+              </Link>
+            </li>
+            <li>
+              <Link href="/guide-delai-retractation" className="text-primary hover:underline">
+                Délai de rétractation de 10 jours : comment ça marche
+              </Link>
+            </li>
+            <li>
+              <Link href="/guide-contre-offre" className="text-primary hover:underline">
+                Contre-offre immobilière : effets juridiques et négociation
+              </Link>
+            </li>
+          </ul>
+        </section>
+
         <div className="rounded-xl bg-secondary/60 border p-8 text-center">
           <h2 className="text-xl font-bold text-primary mb-3">Prêt à faire votre offre ?</h2>
           <p className="text-sm text-muted-foreground mb-6">

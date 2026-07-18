@@ -5,6 +5,9 @@
 ## Pages principales
 - [Créer une offre d'achat](https://yoffre.fr/nouvelle-offre) : formulaire guidé gratuit en 4 étapes.
 - [Guide de l'offre d'achat immobilier](https://yoffre.fr/guide-offre-achat) : valeur juridique, contenu obligatoire, conditions suspensives, délais, rétractation, jurisprudence.
+- [Conditions suspensives d'une offre d'achat](https://yoffre.fr/guide-conditions-suspensives) : clause de prêt (loi Scrivener), préemption, vente préalable, servitudes, permis de construire.
+- [Délai de rétractation en achat immobilier](https://yoffre.fr/guide-delai-retractation) : les 10 jours de l'art. L.271-1 CCH, point de départ, différence offre/compromis.
+- [Contre-offre immobilière](https://yoffre.fr/guide-contre-offre) : effets juridiques d'une contre-proposition (art. 1113 et 1118 du Code civil), caducité de l'offre, négociation.
 - [Yoffre pour les agences immobilières](https://yoffre.fr/agences) : digitalisation de la prise d'offres.
 - [CGU](https://yoffre.fr/cgu) · [Confidentialité](https://yoffre.fr/confidentialite)
 
