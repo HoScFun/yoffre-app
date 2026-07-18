@@ -19,6 +19,30 @@ const Auth = () => {
   const router = useRouter();
   const { toast } = useToast();
 
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      toast({
+        title: "Renseignez votre email",
+        description: "Saisissez l'adresse de votre compte, puis cliquez à nouveau sur « Mot de passe oublié ».",
+        variant: "destructive",
+      });
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({
+        title: "Email envoyé",
+        description: "Si un compte existe pour cette adresse, vous recevrez un lien pour réinitialiser votre mot de passe.",
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -88,7 +112,18 @@ const Auth = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Mot de passe</Label>
+                  {isLogin && (
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      className="text-xs text-muted-foreground hover:text-primary underline"
+                    >
+                      Mot de passe oublié ?
+                    </button>
+                  )}
+                </div>
                 <Input
                   id="password"
                   type="password"
