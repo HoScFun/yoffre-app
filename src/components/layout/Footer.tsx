@@ -117,6 +117,8 @@ export function Footer() {
           <div className="flex items-center justify-center gap-2 flex-wrap">
             <span>© {new Date().getFullYear()} Yoffre</span>
             <span>·</span>
+            <Link href="/newsletter" className="hover:text-primary hover:underline transition-colors">Newsletter</Link>
+            <span>·</span>
             <Link href="/cgu" className="hover:text-primary hover:underline transition-colors">CGU</Link>
             <span>·</span>
             <Link href="/confidentialite" className="hover:text-primary hover:underline transition-colors">Confidentialité</Link>

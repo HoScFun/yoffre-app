@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-offer-emails]
 verify_jwt = false
+
+[functions.newsletter-subscribe]
+verify_jwt = false
