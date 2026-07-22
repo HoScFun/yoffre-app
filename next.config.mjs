@@ -3,6 +3,26 @@ const nextConfig = {
   reactStrictMode: true,
   async redirects() {
     return [
+      // Domaines secondaires → canonique yoffre.fr (Vercel le faisait au niveau
+      // plateforme ; ici c'est l'app qui porte la redirection 308)
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "yoffre.com" }],
+        destination: "https://yoffre.fr/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.yoffre.com" }],
+        destination: "https://yoffre.fr/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.yoffre.fr" }],
+        destination: "https://yoffre.fr/:path*",
+        permanent: true,
+      },
       // Ancienne URL CGV → CGU (le service est gratuit, plus de "vente")
       { source: "/cgv", destination: "/cgu", permanent: true },
       { source: "/tarifs", destination: "/", permanent: true },

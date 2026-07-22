@@ -24,9 +24,10 @@ export default function MentionsLegales() {
           <section>
             <h2 className="text-lg font-semibold text-primary mt-6 mb-2">2. Hébergement</h2>
             <div className="text-sm leading-relaxed text-muted-foreground space-y-1">
-              <p><strong className="text-foreground">Hébergeur :</strong> Supabase Inc.</p>
-              <p><strong className="text-foreground">Adresse :</strong> 970 Toa Payoh North, #07-04, Singapore 318992</p>
-              <p><strong className="text-foreground">Site web :</strong> <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">supabase.com</a></p>
+              <p><strong className="text-foreground">Hébergeur :</strong> Clever Cloud SAS</p>
+              <p><strong className="text-foreground">Adresse :</strong> 4 rue Voltaire, 44000 Nantes, France</p>
+              <p><strong className="text-foreground">Site web :</strong> <a href="https://www.clever.cloud" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">clever.cloud</a></p>
+              <p className="mt-2"><strong className="text-foreground">Données et authentification :</strong> Supabase Inc. — <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">supabase.com</a> (données hébergées dans l'Union européenne)</p>
             </div>
           </section>
 
